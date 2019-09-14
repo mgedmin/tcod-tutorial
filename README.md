@@ -4,6 +4,8 @@ What's this?
 I'm amusing myself by following the [TCOD Roguelike
 Tutorial](http://rogueliketutorials.com/tutorials/tcod/).
 
+![screenshot](screenshots/screenshot01.png)
+
 This is not my code: I'm reimplementing what I see on the tutorial pages, with
 some changes due to personal preferences:
 
