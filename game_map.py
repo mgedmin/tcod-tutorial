@@ -1,7 +1,10 @@
 import random
 
+import tcod
+
 from map_objects import Tile
 from rectangle import Rect
+from entity import Entity
 
 
 class GameMap:
@@ -20,7 +23,8 @@ class GameMap:
 
         return tiles
 
-    def make_map(self, max_rooms, room_min_size, room_max_size, player):
+    def make_map(self, max_rooms, room_min_size, room_max_size, player,
+                 entities, max_monsters_per_room):
         rooms = []
 
         for r in range(max_rooms):
@@ -67,6 +71,8 @@ class GameMap:
                         self.create_v_tunnel(prev_y, new_y, prev_x)
                         self.create_h_tunnel(prev_x, new_x, new_y)
 
+                self.place_entities(new_room, entities, max_monsters_per_room)
+
                 # finally, append the new room to the list
                 rooms.append(new_room)
 
@@ -83,6 +89,25 @@ class GameMap:
     def create_v_tunnel(self, y1, y2, x):
         for y in range(min(y1, y2), max(y1, y2) + 1):
             self.tiles[x][y] = Tile(blocked=False)
+
+    def place_entities(self, room, entities, max_monsters_per_room):
+        # Get a random number of monsters
+        number_of_monsters = random.randint(0, max_monsters_per_room)
+
+        for i in range(number_of_monsters):
+            # Choose a random location in the room
+            x = random.randrange(room.x1 + 1, room.x2)
+            y = random.randrange(room.y1 + 1, room.y2)
+
+            if not any(x == entity.x and y == entity.y
+                       for entity in entities):
+                if random.randrange(100) < 80:
+                    monster = Entity(x, y, 'o', tcod.desaturated_green,
+                                     'Orc', blocks=True)
+                else:
+                    monster = Entity(x, y, 'T', tcod.darker_green,
+                                     'Troll', blocks=True)
+                entities.append(monster)
 
     def is_blocked(self, x, y):
         if 0 <= x < self.width and 0 <= y < self.height:

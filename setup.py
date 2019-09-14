@@ -13,13 +13,14 @@ setup(
     classifiers=[
         "Private"
     ],
-    python_requires=">=3.5",
+    python_requires=">=3.6",
 
     py_modules=[
         "engine",
         "entity",
         "fov_functions",
         "game_map",
+        "game_states",
         "input_handlers",
         "map_objects",
         "render_functions",
