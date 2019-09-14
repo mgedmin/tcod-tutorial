@@ -1,12 +1,14 @@
 #!/usr/bin/python3
 import tcod
 
+from death_functions import kill_player, kill_monster
 from entity import Entity, get_blocking_entities_at_location
+from fighter import Fighter
 from fov_functions import initialize_fov, recompute_fov
 from game_map import GameMap
 from game_states import GameStates
 from input_handlers import handle_keys
-from render_functions import render_all, clear_all
+from render_functions import render_all, clear_all, RenderOrder
 
 
 def main():
@@ -32,7 +34,9 @@ def main():
         'light_ground': tcod.Color(200, 180, 50),
     }
 
-    player = Entity(0, 0, '@', tcod.white, 'Player', blocks=True)
+    player = Entity(0, 0, '@', tcod.white, 'Player', blocks=True,
+                    render_order=RenderOrder.ACTOR,
+                    fighter=Fighter(hp=30, defense=2, power=5))
     entities = [player]
 
     tcod.console_set_custom_font(
@@ -61,6 +65,7 @@ def main():
     game_state = GameStates.PLAYERS_TURN
 
     while not tcod.console_is_window_closed():
+        # XXX: how do I get key autorepeating?
         tcod.sys_check_for_event(tcod.EVENT_KEY_PRESS, key, mouse)
 
         if fov_recompute:
@@ -68,7 +73,7 @@ def main():
                           fov_light_walls, fov_algorithm)
 
         render_all(
-            con, entities, game_map, fov_map, fov_recompute,
+            con, entities, player, game_map, fov_map, fov_recompute,
             screen_width, screen_height, colors)
 
         fov_recompute = False
@@ -83,6 +88,8 @@ def main():
         exit = action.get('exit')
         fullscreen = action.get('fullscreen')
 
+        player_turn_results = []
+
         # XXX: I don't like how this means we might be dropping key events!
         if move and game_state == GameStates.PLAYERS_TURN:
             dx, dy = move
@@ -92,8 +99,7 @@ def main():
                 target = get_blocking_entities_at_location(
                     entities, new_x, new_y)
                 if target:
-                    print(f"You kick the {target.name} in the shins,"
-                          " much to its annoyance!")
+                    player_turn_results.extend(player.fighter.attack(target))
                 else:
                     player.move(dx, dy)
                     fov_recompute = True
@@ -106,13 +112,49 @@ def main():
         if fullscreen:
             tcod.console_set_fullscreen(not tcod.console_is_fullscreen())
 
+        for player_turn_result in player_turn_results:
+            message = player_turn_result.get('message')
+            dead_entity = player_turn_result.get('dead')
+
+            if message:
+                print(message)
+
+            if dead_entity:
+                if dead_entity == player:
+                    message, game_state = kill_player(dead_entity)
+                else:
+                    message = kill_monster(dead_entity)
+
+                print(message)
+
         if game_state == GameStates.ENEMY_TURN:
             for entity in entities:
-                if entity != player:
-                    print(f"The {entity.name} ponders the meaning"
-                          " of its existence.")
+                if entity.ai:
+                    enemy_turn_results = entity.ai.take_turn(
+                        player, fov_map, game_map, entities)
 
-            game_state = GameStates.PLAYERS_TURN
+                    for enemy_turn_result in enemy_turn_results:
+                        message = enemy_turn_result.get('message')
+                        dead_entity = enemy_turn_result.get('dead')
+
+                        if message:
+                            print(message)
+
+                        if dead_entity:
+                            if dead_entity == player:
+                                message, game_state = kill_player(dead_entity)
+                            else:
+                                message = kill_monster(dead_entity)
+
+                            print(message)
+
+                            if game_state == GameStates.PLAYER_DEAD:
+                                break
+
+                    if game_state == GameStates.PLAYER_DEAD:
+                        break
+            else:
+                game_state = GameStates.PLAYERS_TURN
 
 
 if __name__ == "__main__":

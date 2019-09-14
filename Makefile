@@ -1,8 +1,11 @@
+.PHONY: all
 all: env
 
+.PHONY: run
 run: env
 	env/bin/engine
 
+.PHONY: tags
 tags:
 	ctags -R .
 

@@ -16,8 +16,11 @@ setup(
     python_requires=">=3.6",
 
     py_modules=[
+        "ai",
+        "death_functions",
         "engine",
         "entity",
+        "fighter",
         "fov_functions",
         "game_map",
         "game_states",
