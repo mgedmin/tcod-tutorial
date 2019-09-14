@@ -15,7 +15,14 @@ setup(
     ],
     python_requires=">=3.5",
 
-    py_modules=["engine"],
+    py_modules=[
+        "engine",
+        "entity",
+        "game_map",
+        "input_handlers",
+        "map_objects",
+        "render_functions",
+    ],
     install_requires=["tcod"],
     entry_points={
         "console_scripts": [
