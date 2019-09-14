@@ -18,6 +18,7 @@ setup(
     py_modules=[
         "engine",
         "entity",
+        "fov_functions",
         "game_map",
         "input_handlers",
         "map_objects",
