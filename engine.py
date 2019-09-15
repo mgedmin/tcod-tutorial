@@ -81,6 +81,8 @@ def main():
     game_state = GameStates.PLAYERS_TURN
     previous_game_state = game_state
 
+    tcod.sys_set_fps(60)
+
     while not tcod.console_is_window_closed():
         # XXX: how do I get key autorepeating?
         tcod.sys_check_for_event(tcod.EVENT_KEY_PRESS | tcod.EVENT_MOUSE,
