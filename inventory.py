@@ -41,6 +41,9 @@ class Inventory:
                     tcod.yellow,
                 ),
             })
+        elif item_component.targeting and (
+                'target_x' not in kwargs or 'target_y' not in kwargs):
+            results.append({'targeting': item_entity})
         else:
             kwargs = {**item_component.function_kwargs, **kwargs}
             item_use_results = item_component.use_function(

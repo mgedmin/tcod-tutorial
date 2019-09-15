@@ -2,11 +2,13 @@ import tcod
 from game_states import GameStates
 
 
-def handle_keys(key, game_state):
+def handle_keys(key, game_state, mouse):
     if game_state == GameStates.PLAYERS_TURN:
         return handle_player_turn_keys(key)
     elif game_state == GameStates.PLAYER_DEAD:
         return handle_player_dead_keys(key)
+    elif game_state == GameStates.TARGETING:
+        return handle_targeting_keys(key, mouse)
     elif game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
         return handle_inventory_keys(key)
 
@@ -55,6 +57,16 @@ def handle_player_turn_keys(key):
     return {}
 
 
+def handle_targeting_keys(key, mouse):
+    if key.vk == tcod.KEY_ESCAPE:
+        return {'exit': True}
+
+    if key.vk == tcod.KEY_ENTER:
+        return {'left_click': (mouse.cx, mouse.cy)}
+
+    return {}
+
+
 def handle_player_dead_keys(key):
     key_char = chr(key.c)
 
@@ -83,5 +95,16 @@ def handle_inventory_keys(key):
     if key.vk == tcod.KEY_ESCAPE:
         # Exit the menu
         return {'exit': True}
+
+    return {}
+
+
+def handle_mouse(mouse):
+    x, y = mouse.cx, mouse.cy
+
+    if mouse.lbutton_pressed:
+        return {'left_click': (x, y)}
+    elif mouse.rbutton_pressed:
+        return {'right_click': (x, y)}
 
     return {}

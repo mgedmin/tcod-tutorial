@@ -7,3 +7,4 @@ class GameStates(enum.Enum):
     PLAYER_DEAD = enum.auto()
     SHOW_INVENTORY = enum.auto()
     DROP_INVENTORY = enum.auto()
+    TARGETING = enum.auto()

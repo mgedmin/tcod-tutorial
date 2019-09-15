@@ -108,6 +108,9 @@ class Entity:
         # Delete the path to free memory
         tcod.path_delete(my_path)
 
+    def distance(self, x, y):
+        return math.hypot(self.x - x, self.y - y)
+
     def distance_to(self, other):
         dx = other.x - self.x
         dy = other.y - self.y

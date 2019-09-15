@@ -4,9 +4,10 @@ import tcod
 
 from ai import BasicMonster
 from entity import Entity
+from game_messages import Message
 from fighter import Fighter
 from item import Item
-from item_functions import heal
+from item_functions import heal, cast_lightning, cast_fireball, cast_confuse
 from map_objects import Tile
 from rectangle import Rect
 from render_functions import RenderOrder
@@ -130,9 +131,38 @@ class GameMap:
 
             if not any(x == entity.x and y == entity.y
                        for entity in entities):
-                item = Entity(x, y, '!', tcod.violet, 'Healing Potion',
-                              render_order=RenderOrder.ITEM,
-                              item=Item(heal, amount=4))
+                item_chance = random.randrange(100)
+                if item_chance < 70:
+                    item = Entity(x, y, '!', tcod.violet, 'Healing Potion',
+                                  render_order=RenderOrder.ITEM,
+                                  item=Item(heal, amount=4))
+                elif item_chance < 80:
+                    item = Entity(x, y, '#', tcod.red, 'Fireball Scroll',
+                                  render_order=RenderOrder.ITEM,
+                                  item=Item(cast_fireball, targeting=True,
+                                            targeting_message=Message(
+                                                'Left-click a target tile'
+                                                ' for the fireball, or'
+                                                ' right-click to cancel.',
+                                                tcod.light_cyan,
+                                            ),
+                                            damage=12, radius=3))
+                elif item_chance < 90:
+                    item = Entity(x, y, '#', tcod.light_pink,
+                                  'Confusion Scroll',
+                                  render_order=RenderOrder.ITEM,
+                                  item=Item(cast_confuse, targeting=True,
+                                            targeting_message=Message(
+                                                'Left-click an enemy'
+                                                ' to confuse it, or'
+                                                ' right-click to cancel.',
+                                                tcod.light_cyan,
+                                            )))
+                else:
+                    item = Entity(x, y, '#', tcod.yellow, 'Lightning Scroll',
+                                  render_order=RenderOrder.ITEM,
+                                  item=Item(cast_lightning,
+                                            damage=20, maximum_range=5))
                 entities.append(item)
 
     def is_blocked(self, x, y):
