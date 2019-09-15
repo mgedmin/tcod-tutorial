@@ -3,3 +3,4 @@ bin
 env
 *.egg-info
 tags
+savegame.dat

@@ -17,6 +17,7 @@ setup(
 
     py_modules=[
         "ai",
+        "data_loaders",
         "death_functions",
         "engine",
         "entity",
@@ -25,6 +26,7 @@ setup(
         "game_map",
         "game_messages",
         "game_states",
+        "initialize_new_game",
         "input_handlers",
         "inventory",
         "item",
