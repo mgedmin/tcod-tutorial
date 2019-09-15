@@ -5,6 +5,8 @@ import tcod
 from ai import BasicMonster
 from entity import Entity
 from fighter import Fighter
+from item import Item
+from item_functions import heal
 from map_objects import Tile
 from rectangle import Rect
 from render_functions import RenderOrder
@@ -27,7 +29,7 @@ class GameMap:
         return tiles
 
     def make_map(self, max_rooms, room_min_size, room_max_size, player,
-                 entities, max_monsters_per_room):
+                 entities, max_monsters_per_room, max_items_per_room):
         rooms = []
 
         for r in range(max_rooms):
@@ -74,7 +76,8 @@ class GameMap:
                         self.create_v_tunnel(prev_y, new_y, prev_x)
                         self.create_h_tunnel(prev_x, new_x, new_y)
 
-                self.place_entities(new_room, entities, max_monsters_per_room)
+                self.place_entities(new_room, entities, max_monsters_per_room,
+                                    max_items_per_room)
 
                 # finally, append the new room to the list
                 rooms.append(new_room)
@@ -93,9 +96,10 @@ class GameMap:
         for y in range(min(y1, y2), max(y1, y2) + 1):
             self.tiles[x][y] = Tile(blocked=False)
 
-    def place_entities(self, room, entities, max_monsters_per_room):
-        # Get a random number of monsters
+    def place_entities(self, room, entities, max_monsters_per_room,
+                       max_items_per_room):
         number_of_monsters = random.randint(0, max_monsters_per_room)
+        number_of_items = random.randint(0, max_items_per_room)
 
         for i in range(number_of_monsters):
             # Choose a random location in the room
@@ -119,6 +123,17 @@ class GameMap:
                         ai=BasicMonster(),
                     )
                 entities.append(monster)
+
+        for i in range(number_of_items):
+            x = random.randrange(room.x1 + 1, room.x2)
+            y = random.randrange(room.y1 + 1, room.y2)
+
+            if not any(x == entity.x and y == entity.y
+                       for entity in entities):
+                item = Entity(x, y, '!', tcod.violet, 'Healing Potion',
+                              render_order=RenderOrder.ITEM,
+                              item=Item(heal, amount=4))
+                entities.append(item)
 
     def is_blocked(self, x, y):
         if 0 <= x < self.width and 0 <= y < self.height:
