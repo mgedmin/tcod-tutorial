@@ -173,7 +173,7 @@ def main():
             message = player_turn_result.get('message')
             dead_entity = player_turn_result.get('dead')
             item_added = player_turn_result.get('item_added')
-            item_consumed = player_turn_result.get('item_consumed')
+            item_consumed = player_turn_result.get('consumed')
             item_dropped = player_turn_result.get('item_dropped')
 
             if message:
