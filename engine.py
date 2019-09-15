@@ -22,6 +22,7 @@ def main():
         constants.screen_width, constants.screen_height,
         constants.window_title,
         fullscreen=False,
+        renderer=tcod.RENDERER_SDL2,
     )
     tcod.sys_set_fps(60)
 
