@@ -62,6 +62,10 @@ def main():
             new_game = action.get('new_game')
             load_saved_game = action.get('load_game')
             exit_game = action.get('exit')
+            fullscreen = action.get('fullscreen')
+
+            if fullscreen:
+                tcod.console_set_fullscreen(not tcod.console_is_fullscreen())
 
             if show_load_error_message and (
                     new_game or load_saved_game or exit_game):

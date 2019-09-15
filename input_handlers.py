@@ -3,6 +3,10 @@ from game_states import GameStates
 
 
 def handle_keys(key, game_state, mouse):
+    if key.vk == tcod.KEY_ENTER and key.lalt:
+        # Alt+Enter: toggle full screen
+        return {'fullscreen': True}
+
     if game_state == GameStates.PLAYERS_TURN:
         return handle_player_turn_keys(key)
     elif game_state == GameStates.PLAYER_DEAD:
@@ -45,10 +49,6 @@ def handle_player_turn_keys(key):
     if key_char == 'd':
         return {'drop_inventory': True}
 
-    if key.vk == tcod.KEY_ENTER and key.lalt:
-        # Alt+Enter: toggle full screen
-        return {'fullscreen': True}
-
     if key.vk == tcod.KEY_ESCAPE:
         # Exit the game
         return {'exit': True}
@@ -73,10 +73,6 @@ def handle_player_dead_keys(key):
     if key_char == 'i':
         return {'show_inventory': True}
 
-    if key.vk == tcod.KEY_ENTER and key.lalt:
-        # Alt+Enter: toggle full screen
-        return {'fullscreen': True}
-
     if key.vk == tcod.KEY_ESCAPE:
         # Exit the game
         return {'exit': True}
@@ -87,10 +83,6 @@ def handle_player_dead_keys(key):
 def handle_inventory_keys(key):
     if ord('a') <= key.c <= ord('z'):
         return {'inventory_index': key.c - ord('a')}
-
-    if key.vk == tcod.KEY_ENTER and key.lalt:
-        # Alt+Enter: toggle full screen
-        return {'fullscreen': True}
 
     if key.vk == tcod.KEY_ESCAPE:
         # Exit the menu
@@ -107,6 +99,10 @@ def handle_main_menu(key):
         return {'load_game': True}
     if key_char == 'c' or key.vk == tcod.KEY_ESCAPE:
         return {'exit': True}
+
+    if key.vk == tcod.KEY_ENTER and key.lalt:
+        # Alt+Enter: toggle full screen
+        return {'fullscreen': True}
 
     return {}
 
