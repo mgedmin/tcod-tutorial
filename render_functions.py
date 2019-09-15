@@ -10,8 +10,36 @@ class RenderOrder(enum.Enum):
     ACTOR = 3
 
 
-def render_all(con, entities, player, game_map, fov_map, fov_recompute,
-               screen_width, screen_height, colors):
+def get_names_under_mouse(mouse, entities, fov_map):
+    (x, y) = (mouse.cx, mouse.cy)
+
+    names = [
+        entity.name
+        for entity in entities
+        if (x, y) == (entity.x, entity.y) and tcod.map_is_in_fov(fov_map, x, y)
+    ]
+    return ', '.join(names).capitalize()
+
+
+def render_bar(panel, x, y, total_width, name, value, maximum,
+               bar_color, back_color):
+    bar_width = value * total_width // maximum
+
+    tcod.console_set_default_background(panel, back_color)
+    tcod.console_rect(panel, x, y, total_width, 1, False, tcod.BKGND_SCREEN)
+
+    tcod.console_set_default_background(panel, bar_color)
+    if bar_width > 0:
+        tcod.console_rect(panel, x, y, bar_width, 1, False, tcod.BKGND_SCREEN)
+
+    tcod.console_set_default_foreground(panel, tcod.white)
+    tcod.console_print_ex(panel, x + total_width // 2, y, tcod.BKGND_NONE,
+                          tcod.CENTER, f"{name}: {value}/{maximum}")
+
+
+def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute,
+               message_log, screen_width, screen_height, bar_width,
+               panel_height, panel_y, mouse, colors):
     # Draw all the tiles in the game map
     if fov_recompute:
         for y in range(game_map.height):
@@ -38,12 +66,26 @@ def render_all(con, entities, player, game_map, fov_map, fov_recompute,
     for entity in sorted(entities, key=attrgetter('render_order.value')):
         draw_entity(con, entity, fov_map)
 
-    tcod.console_set_default_foreground(con, tcod.white)
-    tcod.console_print_ex(
-        con, 1, screen_height - 2, tcod.BKGND_NONE, tcod.LEFT,
-        f'HP: {player.fighter.hp:02}/{player.fighter.max_hp:02}')
-
     tcod.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
+
+    tcod.console_set_default_background(panel, tcod.black)
+    tcod.console_clear(panel)
+
+    # Print the game messages, one line at a time
+    for y, message in enumerate(message_log.messages, 1):
+        tcod.console_set_default_foreground(panel, message.color)
+        tcod.console_print_ex(panel, message_log.x, y, tcod.BKGND_NONE,
+                              tcod.LEFT, message.text)
+
+    render_bar(panel, 1, 1, bar_width,
+               'HP', player.fighter.hp, player.fighter.max_hp,
+               tcod.light_red, tcod.darker_red)
+
+    tcod.console_set_default_foreground(panel, tcod.light_gray)
+    tcod.console_print_ex(panel, 1, 0, tcod.BKGND_NONE, tcod.LEFT,
+                          get_names_under_mouse(mouse, entities, fov_map))
+
+    tcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)
 
 
 def clear_all(con, entities):

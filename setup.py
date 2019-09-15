@@ -23,6 +23,7 @@ setup(
         "fighter",
         "fov_functions",
         "game_map",
+        "game_messages",
         "game_states",
         "input_handlers",
         "map_objects",
