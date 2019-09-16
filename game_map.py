@@ -4,21 +4,23 @@ import tcod
 
 from ai import BasicMonster
 from entity import Entity
-from game_messages import Message
 from fighter import Fighter
+from game_messages import Message
 from item import Item
-from item_functions import heal, cast_lightning, cast_fireball, cast_confuse
+from item_functions import cast_confuse, cast_fireball, cast_lightning, heal
 from map_objects import Tile
 from rectangle import Rect
 from render_functions import RenderOrder
+from stairs import Stairs
 
 
 class GameMap:
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, dungeon_level=1):
         self.width = width
         self.height = height
         self.tiles = self.initialize_tiles()
+        self.dungeon_level = dungeon_level
 
     def initialize_tiles(self):
         # Whoa there, a column-major matrix?  You don't see those every day!
@@ -83,6 +85,13 @@ class GameMap:
                 # finally, append the new room to the list
                 rooms.append(new_room)
 
+        center_of_last_room_x, center_of_last_room_y = rooms[-1].center()
+        down_stairs = Entity(center_of_last_room_x, center_of_last_room_y,
+                             '>', tcod.white, 'Stairs',
+                             render_order=RenderOrder.STAIRS,
+                             stairs=Stairs(self.dungeon_level + 1))
+        entities.append(down_stairs)
+
     def create_room(self, room):
         # go through the tiles in the rectangle and make them passable
         for x in range(room.x1 + 1, room.x2):
@@ -113,14 +122,14 @@ class GameMap:
                     monster = Entity(
                         x, y, 'o', tcod.desaturated_green, 'Orc', blocks=True,
                         render_order=RenderOrder.ACTOR,
-                        fighter=Fighter(hp=10, defense=0, power=3),
+                        fighter=Fighter(hp=10, defense=0, power=3, xp=35),
                         ai=BasicMonster(),
                     )
                 else:
                     monster = Entity(
                         x, y, 'T', tcod.darker_green, 'Troll', blocks=True,
                         render_order=RenderOrder.ACTOR,
-                        fighter=Fighter(hp=16, defense=1, power=4),
+                        fighter=Fighter(hp=16, defense=1, power=4, xp=100),
                         ai=BasicMonster(),
                     )
                 entities.append(monster)
@@ -170,3 +179,21 @@ class GameMap:
             return self.tiles[x][y].blocked
         else:
             return True
+
+    def next_floor(self, player, message_log, constants):
+        self.dungeon_level += 1
+        entities = [player]
+
+        self.tiles = self.initialize_tiles()
+        self.make_map(
+            constants.max_rooms, constants.room_min_size,
+            constants.room_max_size, player, entities,
+            constants.max_monsters_per_room, constants.max_items_per_room)
+
+        player.fighter.heal(player.fighter.max_hp // 2)
+
+        message_log.add_message(
+            Message('You take a moment to rest, and recover your strength.',
+                    tcod.light_violet))
+
+        return entities

@@ -8,3 +8,5 @@ class GameStates(enum.Enum):
     SHOW_INVENTORY = enum.auto()
     DROP_INVENTORY = enum.auto()
     TARGETING = enum.auto()
+    LEVEL_UP = enum.auto()
+    CHARACTER_SCREEN = enum.auto()

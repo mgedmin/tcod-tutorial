@@ -31,9 +31,11 @@ setup(
         "inventory",
         "item",
         "item_functions",
+        "level",
         "map_objects",
         "menus",
         "render_functions",
+        "stairs",
     ],
     install_requires=["tcod"],
     entry_points={

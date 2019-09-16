@@ -6,6 +6,7 @@ from game_map import GameMap
 from game_messages import MessageLog
 from game_states import GameStates
 from inventory import Inventory
+from level import Level
 from render_functions import RenderOrder
 
 
@@ -49,7 +50,7 @@ def get_game_variables():
     player = Entity(0, 0, '@', tcod.white, 'Player', blocks=True,
                     render_order=RenderOrder.ACTOR,
                     fighter=Fighter(hp=30, defense=2, power=5),
-                    inventory=Inventory(26))
+                    inventory=Inventory(26), level=Level())
     entities = [player]
 
     game_map = GameMap(constants.map_width, constants.map_height)
