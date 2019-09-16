@@ -85,7 +85,15 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute,
                'HP', player.fighter.hp, player.fighter.max_hp,
                tcod.light_red, tcod.darker_red)
 
+    render_bar(panel, 1, 2, bar_width,
+               'XP', player.level.current_xp,
+               player.level.experience_to_next_level,
+               tcod.light_blue, tcod.darker_blue)
+
     tcod.console_print_ex(panel, 1, 3, tcod.BKGND_NONE, tcod.LEFT,
+                          f'Player level: {player.level.current_level}')
+
+    tcod.console_print_ex(panel, 1, 4, tcod.BKGND_NONE, tcod.LEFT,
                           f'Dungeon level: {game_map.dungeon_level}')
 
     tcod.console_set_default_foreground(panel, tcod.light_gray)
