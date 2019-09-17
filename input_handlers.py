@@ -121,7 +121,9 @@ def handle_level_up_menu(key):
 
 
 def handle_character_screen(key):
-    if key.vk == tcod.KEY_ESCAPE:
+    key_char = chr(key.c)
+
+    if key_char == 'c' or key.vk == tcod.KEY_ESCAPE:
         return {'exit': True}
 
     return {}

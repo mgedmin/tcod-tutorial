@@ -34,6 +34,7 @@ setup(
         "level",
         "map_objects",
         "menus",
+        "random_utils",
         "render_functions",
         "stairs",
     ],

@@ -35,9 +35,6 @@ class constants:
     fov_light_walls = True
     fov_radius = 10
 
-    max_monsters_per_room = 3
-    max_items_per_room = 2
-
     colors = {
         'dark_wall': tcod.Color(0, 0, 100),
         'dark_ground': tcod.Color(50, 50, 150),
@@ -49,15 +46,14 @@ class constants:
 def get_game_variables():
     player = Entity(0, 0, '@', tcod.white, 'Player', blocks=True,
                     render_order=RenderOrder.ACTOR,
-                    fighter=Fighter(hp=30, defense=2, power=5),
+                    fighter=Fighter(hp=100, defense=1, power=4),
                     inventory=Inventory(26), level=Level())
     entities = [player]
 
     game_map = GameMap(constants.map_width, constants.map_height)
     game_map.make_map(
         constants.max_rooms, constants.room_min_size, constants.room_max_size,
-        player, entities, constants.max_monsters_per_room,
-        constants.max_items_per_room)
+        player, entities)
 
     message_log = MessageLog(
         constants.message_x, constants.message_width, constants.message_height)
