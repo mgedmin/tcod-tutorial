@@ -35,12 +35,15 @@ class Inventory:
 
         item_component = item_entity.item
         if item_component.use_function is None:
-            results.append({
-                'message': Message(
-                    f'The {item_entity.name} cannot be used',
-                    tcod.yellow,
-                ),
-            })
+            if item_entity.equippable:
+                results.append({'equip': item_entity})
+            else:
+                results.append({
+                    'message': Message(
+                        f'The {item_entity.name} cannot be used',
+                        tcod.yellow,
+                    ),
+                })
         elif item_component.targeting and (
                 'target_x' not in kwargs or 'target_y' not in kwargs):
             results.append({'targeting': item_entity})
@@ -63,6 +66,9 @@ class Inventory:
 
     def drop_item(self, item):
         results = []
+
+        if self.owner.equipment.is_equipped(item):
+            self.owner.equipment.toggle_equip(item)
 
         item.x = self.owner.x
         item.y = self.owner.y

@@ -1,6 +1,9 @@
 import tcod
 
 from entity import Entity
+from equipment import Equipment
+from equipment_slots import EquipmentSlots
+from equippable import Equippable
 from fighter import Fighter
 from game_map import GameMap
 from game_messages import MessageLog
@@ -46,9 +49,19 @@ class constants:
 def get_game_variables():
     player = Entity(0, 0, '@', tcod.white, 'Player', blocks=True,
                     render_order=RenderOrder.ACTOR,
-                    fighter=Fighter(hp=100, defense=1, power=4),
-                    inventory=Inventory(26), level=Level())
+                    fighter=Fighter(hp=100, defense=1, power=2),
+                    inventory=Inventory(26),
+                    equipment=Equipment(),
+                    level=Level())
     entities = [player]
+
+    dagger = Entity(0, 0, '-', tcod.sky, 'Dagger',
+                    render_order=RenderOrder.ITEM,
+                    equippable=Equippable(
+                        EquipmentSlots.MAIN_HAND,
+                        power_bonus=2))
+    player.inventory.add_item(dagger)
+    player.equipment.toggle_equip(dagger)
 
     game_map = GameMap(constants.map_width, constants.map_height)
     game_map.make_map(

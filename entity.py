@@ -2,15 +2,27 @@ import math
 
 import tcod
 
+from components import component
+from item import Item
 from render_functions import RenderOrder
 
 
 class Entity:
     """A generic object to represent players, enemies, items etc."""
 
+    fighter = component('fighter')
+    ai = component('ai')
+    item = component('item')
+    inventory = component('inventory')
+    stairs = component('stairs')
+    level = component('level')
+    equipment = component('equipment')
+    equippable = component('equippable')
+
     def __init__(self, x, y, char, color, name, blocks=False,
                  render_order=RenderOrder.CORPSE, fighter=None, ai=None,
-                 item=None, inventory=None, stairs=None, level=None):
+                 item=None, inventory=None, stairs=None, level=None,
+                 equipment=None, equippable=None):
         self.x = x
         self.y = y
         self.char = char
@@ -18,31 +30,19 @@ class Entity:
         self.name = name
         self.blocks = blocks
         self.render_order = render_order
+
+        # Components
         self.fighter = fighter
         self.ai = ai
         self.item = item
         self.inventory = inventory
         self.stairs = stairs
         self.level = level
+        self.equipment = equipment
+        self.equippable = equippable
 
-        # Components
-        if self.fighter:
-            self.fighter.owner = self
-
-        if self.ai:
-            self.ai.owner = self
-
-        if self.item:
-            self.item.owner = self
-
-        if self.inventory:
-            self.inventory.owner = self
-
-        if self.stairs:
-            self.stairs.owner = self
-
-        if self.level:
-            self.level.owner = self
+        if self.equippable and not self.item:
+            self.item = Item()
 
     def move(self, dx, dy):
         """Move the entity by a given amount."""

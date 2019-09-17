@@ -4,6 +4,8 @@ import tcod
 
 from ai import BasicMonster
 from entity import Entity
+from equipment_slots import EquipmentSlots
+from equippable import Equippable
 from fighter import Fighter
 from game_messages import Message
 from item import Item
@@ -130,6 +132,12 @@ class GameMap:
         }
         item_chances = {
             'healing_potion': 35,
+            'sword': from_dungeon_level(self.dungeon_level, [
+                [5, 4],
+            ]),
+            'shield': from_dungeon_level(self.dungeon_level, [
+                [15, 8],
+            ]),
             'lightning_scroll': from_dungeon_level(self.dungeon_level, [
                 [25, 4],
             ]),
@@ -178,6 +186,18 @@ class GameMap:
                     item = Entity(x, y, '!', tcod.violet, 'Healing Potion',
                                   render_order=RenderOrder.ITEM,
                                   item=Item(heal, amount=40))
+                elif item_choice == 'sword':
+                    item = Entity(x, y, '/', tcod.sky, 'Sword',
+                                  render_order=RenderOrder.ITEM,
+                                  equippable=Equippable(
+                                      EquipmentSlots.MAIN_HAND,
+                                      power_bonus=3))
+                elif item_choice == 'shield':
+                    item = Entity(x, y, '[', tcod.sky, 'Sword',
+                                  render_order=RenderOrder.ITEM,
+                                  equippable=Equippable(
+                                      EquipmentSlots.OFF_HAND,
+                                      defense_bonus=1))
                 elif item_choice == 'fireball_scroll':
                     item = Entity(x, y, '#', tcod.red, 'Fireball Scroll',
                                   render_order=RenderOrder.ITEM,

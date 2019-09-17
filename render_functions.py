@@ -106,13 +106,13 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute,
         inventory_menu(
             con,
             "Press the key next to an item to use it, or Esc to cancel.\n",
-            player.inventory, 50, screen_width, screen_height,
+            player, 50, screen_width, screen_height,
         )
     elif game_state == GameStates.DROP_INVENTORY:
         inventory_menu(
             con,
             "Press the key next to an item to drop it, or Esc to cancel.\n",
-            player.inventory, 50, screen_width, screen_height,
+            player, 50, screen_width, screen_height,
         )
     elif game_state == GameStates.LEVEL_UP:
         level_up_menu(con, 'Level up! Choose a stat to raise:', player, 40,

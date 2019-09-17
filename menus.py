@@ -34,14 +34,20 @@ def menu(con, header, options, width, screen_width, screen_height):
     tcod.console_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
 
 
-def inventory_menu(con, header, inventory, inventory_width,
+def inventory_menu(con, header, player, inventory_width,
                    screen_width, screen_height):
     # show a menu with each item of the inventory as an option
-    if not inventory.items:
+    if not player.inventory.items:
         # XXX: I don't like this getting an option letter like '(a)'
         options = ['Inventory is empty.']
     else:
-        options = [item.name for item in inventory.items]
+        options = []
+        for item in player.inventory.items:
+            if player.equipment.is_equipped(item):
+                slot = player.equipment.where_equipped(item)
+                options.append(f"{item.name} (on {slot.value})")
+            else:
+                options.append(item.name)
 
     menu(con, header, options, inventory_width, screen_width, screen_height)
 
