@@ -1,38 +1,41 @@
 import tcod
 
+from components import Component
+from entity import Entity
 from game_messages import Message
+from game_types import ActionResults
 
 
-class Fighter:
+class Fighter(Component):
 
-    def __init__(self, hp, defense, power, xp=0):
+    def __init__(self, hp: int, defense: int, power: int, xp: int = 0):
         self.base_max_hp = self.hp = hp
         self.base_defense = defense
         self.base_power = power
         self.xp = xp
 
     @property
-    def max_hp(self):
+    def max_hp(self) -> int:
         bonus = 0
         if self.owner and self.owner.equipment:
             bonus += self.owner.equipment.max_hp_bonus
         return self.base_max_hp + bonus
 
     @property
-    def power(self):
+    def power(self) -> int:
         bonus = 0
         if self.owner and self.owner.equipment:
             bonus += self.owner.equipment.power_bonus
         return self.base_power + bonus
 
     @property
-    def defense(self):
+    def defense(self) -> int:
         bonus = 0
         if self.owner and self.owner.equipment:
             bonus += self.owner.equipment.defense_bonus
         return self.base_defense + bonus
 
-    def take_damage(self, amount):
+    def take_damage(self, amount: int) -> ActionResults:
         results = []
 
         self.hp -= amount
@@ -41,12 +44,12 @@ class Fighter:
 
         return results
 
-    def heal(self, amount):
+    def heal(self, amount: int) -> None:
         self.hp += amount
         if self.hp > self.max_hp:
             self.hp = self.max_hp
 
-    def attack(self, target):
+    def attack(self, target: Entity) -> ActionResults:
         results = []
 
         damage = self.power - target.fighter.defense

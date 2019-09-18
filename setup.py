@@ -30,6 +30,7 @@ setup(
         "game_map",
         "game_messages",
         "game_states",
+        "game_types",
         "initialize_new_game",
         "input_handlers",
         "inventory",

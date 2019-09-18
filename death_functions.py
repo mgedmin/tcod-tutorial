@@ -1,17 +1,20 @@
+from typing import Tuple
+
 import tcod
 
-from game_states import GameStates
+from entity import Entity
 from game_messages import Message
+from game_states import GameStates
 from render_functions import RenderOrder
 
 
-def kill_player(player):
+def kill_player(player: Entity) -> Tuple[Message, GameStates]:
     player.char = '%'
     player.color = tcod.dark_red
     return (Message('You died!', tcod.red), GameStates.PLAYER_DEAD)
 
 
-def kill_monster(monster):
+def kill_monster(monster: Entity) -> Message:
     death_message = Message(f'{monster.name.capitalize()} is dead!',
                             tcod.orange)
 

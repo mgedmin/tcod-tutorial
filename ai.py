@@ -1,14 +1,33 @@
 import random
+from typing import TYPE_CHECKING, List
 
 import tcod
 
+from components import Component
 from game_messages import Message
+from game_types import ActionResults
+
+if TYPE_CHECKING:
+    from entity import Entity
+    from game_map import GameMap
 
 
-class BasicMonster:
+class AIComponent(Component):
 
-    def take_turn(self, target, fov_map, game_map, entities):
-        results = []
+    def take_turn(
+        self, target: 'Entity', fov_map: tcod.map.Map,
+        game_map: 'GameMap', entities: List['Entity'],
+    ) -> ActionResults:
+        raise NotImplementedError
+
+
+class BasicMonster(AIComponent):
+
+    def take_turn(
+        self, target: 'Entity', fov_map: tcod.map.Map,
+        game_map: 'GameMap', entities: List['Entity'],
+    ) -> ActionResults:
+        results: ActionResults = []
 
         monster = self.owner
         if tcod.map_is_in_fov(fov_map, monster.x, monster.y):
@@ -20,13 +39,17 @@ class BasicMonster:
         return results
 
 
-class ConfusedMonster:
+class ConfusedMonster(AIComponent):
 
-    def __init__(self, previous_ai, number_of_turns=10):
+    def __init__(self, previous_ai: AIComponent,
+                 number_of_turns: int = 10) -> None:
         self.previous_ai = previous_ai
         self.number_of_turns = number_of_turns
 
-    def take_turn(self, target, fov_map, game_map, entities):
+    def take_turn(
+        self, target: 'Entity', fov_map: tcod.map.Map,
+        game_map: 'GameMap', entities: List['Entity'],
+    ) -> ActionResults:
         results = []
 
         if self.number_of_turns > 0:

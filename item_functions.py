@@ -1,10 +1,14 @@
+from typing import Any, List
+
 import tcod
 
 from ai import ConfusedMonster
+from entity import Entity
 from game_messages import Message
+from game_types import ActionResults
 
 
-def heal(entity, *, amount, **_):
+def heal(entity: Entity, *, amount: int, **_: Any) -> ActionResults:
     results = []
 
     if entity.fighter.hp == entity.fighter.max_hp:
@@ -23,7 +27,10 @@ def heal(entity, *, amount, **_):
     return results
 
 
-def cast_lightning(caster, *, entities, fov_map, damage, maximum_range, **_):
+def cast_lightning(
+    caster: Entity, *, entities: List[Entity], fov_map: tcod.map.Map,
+    damage: int, maximum_range: float, **_: Any
+) -> ActionResults:
     results = []
 
     target = None
@@ -60,8 +67,10 @@ def cast_lightning(caster, *, entities, fov_map, damage, maximum_range, **_):
     return results
 
 
-def cast_fireball(entity, *, entities, fov_map, damage, radius,
-                  target_x, target_y, **_):
+def cast_fireball(
+    entity: Entity, *, entities: List[Entity], fov_map: tcod.map.Map,
+    damage: int, radius: int, target_x: int, target_y: int, **_: Any
+) -> ActionResults:
     results = []
 
     if not tcod.map_is_in_fov(fov_map, target_x, target_y):
@@ -96,7 +105,10 @@ def cast_fireball(entity, *, entities, fov_map, damage, radius,
     return results
 
 
-def cast_confuse(entity, *, fov_map, entities, target_x, target_y, **_):
+def cast_confuse(
+    entity: Entity, *, fov_map: tcod.map.Map, entities: List[Entity],
+    target_x: int, target_y: int, **_: Any
+) -> ActionResults:
     results = []
 
     if not tcod.map_is_in_fov(fov_map, target_x, target_y):

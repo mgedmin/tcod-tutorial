@@ -1,3 +1,5 @@
+from typing import List, Tuple
+
 import tcod
 
 from entity import Entity
@@ -46,7 +48,8 @@ class constants:
     }
 
 
-def get_game_variables():
+def get_game_variables() -> Tuple[Entity, List[Entity], GameMap, MessageLog,
+                                  GameStates]:
     player = Entity(0, 0, '@', tcod.white, 'Player', blocks=True,
                     render_order=RenderOrder.ACTOR,
                     fighter=Fighter(hp=100, defense=1, power=2),

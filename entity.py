@@ -1,10 +1,21 @@
 import math
+from typing import List, Optional, TYPE_CHECKING
 
 import tcod
 
 from components import component
 from item import Item
 from render_functions import RenderOrder
+
+if TYPE_CHECKING:  # noqa: F401
+    from game_map import GameMap
+    from ai import AIComponent
+    from equipment import Equipment
+    from equippable import Equippable
+    from fighter import Fighter
+    from inventory import Inventory
+    from level import Level
+    from stairs import Stairs
 
 
 class Entity:
@@ -19,10 +30,17 @@ class Entity:
     equipment = component('equipment')
     equippable = component('equippable')
 
-    def __init__(self, x, y, char, color, name, blocks=False,
-                 render_order=RenderOrder.CORPSE, fighter=None, ai=None,
-                 item=None, inventory=None, stairs=None, level=None,
-                 equipment=None, equippable=None):
+    def __init__(self, x: int, y: int, char: str, color: tcod.Color, name: str,
+                 blocks: bool = False,
+                 render_order: RenderOrder = RenderOrder.CORPSE,
+                 fighter: Optional['Fighter'] = None,
+                 ai: Optional['AIComponent'] = None,
+                 item: Optional['Item'] = None,
+                 inventory: Optional['Inventory'] = None,
+                 stairs: Optional['Stairs'] = None,
+                 level: Optional['Level'] = None,
+                 equipment: Optional['Equipment'] = None,
+                 equippable: Optional['Equippable'] = None):
         self.x = x
         self.y = y
         self.char = char
@@ -44,12 +62,13 @@ class Entity:
         if self.equippable and not self.item:
             self.item = Item()
 
-    def move(self, dx, dy):
+    def move(self, dx: int, dy: int) -> None:
         """Move the entity by a given amount."""
         self.x += dx
         self.y += dy
 
-    def move_towards(self, target_x, target_y, game_map, entities):
+    def move_towards(self, target_x: int, target_y: int, game_map: 'GameMap',
+                     entities: List['Entity']) -> None:
         dx = target_x - self.x
         dy = target_y - self.y
         distance = math.hypot(dx, dy)
@@ -61,7 +80,8 @@ class Entity:
                     entities, self.x + dx, self.y + dy)):
             self.move(dx, dy)
 
-    def move_astar(self, target, entities, game_map):
+    def move_astar(self, target: 'Entity', entities: List['Entity'],
+                   game_map: 'GameMap') -> None:
         # Create a FOV map that has the dimensions of the map
         fov = tcod.map_new(game_map.width, game_map.height)
 
@@ -102,11 +122,11 @@ class Entity:
         # away
         if not tcod.path_is_empty(my_path) and tcod.path_size(my_path) < 25:
             # Find the next coordinates in the computed full path
-            x, y = tcod.path_walk(my_path, True)
-            if x or y:
+            next_x, next_y = tcod.path_walk(my_path, True)
+            if next_x is not None and next_y is not None:
                 # Set self's coordinates to the next path tile
-                self.x = x
-                self.y = y
+                self.x = next_x
+                self.y = next_y
         else:
             # Keep the old move function as a backup so that if there are no
             # paths (for example another monster blocks a corridor) it will
@@ -117,16 +137,17 @@ class Entity:
         # Delete the path to free memory
         tcod.path_delete(my_path)
 
-    def distance(self, x, y):
+    def distance(self, x: int, y: int) -> float:
         return math.hypot(self.x - x, self.y - y)
 
-    def distance_to(self, other):
+    def distance_to(self, other: 'Entity') -> float:
         dx = other.x - self.x
         dy = other.y - self.y
         return math.hypot(dx, dy)
 
 
-def get_blocking_entities_at_location(entities, x, y):
+def get_blocking_entities_at_location(entities: List[Entity],
+                                      x: int, y: int) -> Optional[Entity]:
     for entity in entities:
         if entity.blocks and entity.x == x and entity.y == y:
             return entity

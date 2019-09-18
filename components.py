@@ -1,17 +1,27 @@
-def component(name):
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from entity import Entity
+
+
+class Component:
+    owner: 'Entity'
+
+
+def component(name: str) -> property:
     """Decorator for defining Entity component slots.
 
     All it does is update the component's owner when you assign a new component
     to an entity.
     """
 
-    def getter(self):
+    def getter(self: 'Entity') -> Component:
         try:
             return self.__dict__[name]
         except KeyError:
             raise AttributeError(name)
 
-    def setter(self, value):
+    def setter(self: 'Entity', value: Component) -> None:
         # it might be nice to set the owner of the old value to None, if there
         # was an old value
         # it might be nice to make sure the component doesn't already have an

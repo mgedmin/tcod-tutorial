@@ -1,4 +1,5 @@
 import random
+from typing import TYPE_CHECKING, List, Type
 
 import tcod
 
@@ -7,7 +8,7 @@ from entity import Entity
 from equipment_slots import EquipmentSlots
 from equippable import Equippable
 from fighter import Fighter
-from game_messages import Message
+from game_messages import Message, MessageLog
 from item import Item
 from item_functions import cast_confuse, cast_fireball, cast_lightning, heal
 from map_objects import Tile
@@ -16,16 +17,20 @@ from rectangle import Rect
 from render_functions import RenderOrder
 from stairs import Stairs
 
+if TYPE_CHECKING:
+    from initialize_new_game import constants
+
 
 class GameMap:
 
-    def __init__(self, width, height, dungeon_level=1):
+    def __init__(self, width: int, height: int,
+                 dungeon_level: int = 1) -> None:
         self.width = width
         self.height = height
         self.tiles = self.initialize_tiles()
         self.dungeon_level = dungeon_level
 
-    def initialize_tiles(self):
+    def initialize_tiles(self) -> List[List[Tile]]:
         # Whoa there, a column-major matrix?  You don't see those every day!
         tiles = [
             [Tile(blocked=True) for y in range(self.height)]
@@ -34,9 +39,9 @@ class GameMap:
 
         return tiles
 
-    def make_map(self, max_rooms, room_min_size, room_max_size, player,
-                 entities):
-        rooms = []
+    def make_map(self, max_rooms: int, room_min_size: int, room_max_size: int,
+                 player: Entity, entities: List[Entity]) -> None:
+        rooms: List[Rect] = []
 
         for r in range(max_rooms):
             # random width and height
@@ -94,30 +99,30 @@ class GameMap:
                              stairs=Stairs(self.dungeon_level + 1))
         entities.append(down_stairs)
 
-    def create_room(self, room):
+    def create_room(self, room: Rect) -> None:
         # go through the tiles in the rectangle and make them passable
         for x in range(room.x1 + 1, room.x2):
             for y in range(room.y1 + 1, room.y2):
                 self.tiles[x][y] = Tile(blocked=False)
 
-    def create_h_tunnel(self, x1, x2, y):
+    def create_h_tunnel(self, x1: int, x2: int, y: int) -> None:
         for x in range(min(x1, x2), max(x1, x2) + 1):
             self.tiles[x][y] = Tile(blocked=False)
 
-    def create_v_tunnel(self, y1, y2, x):
+    def create_v_tunnel(self, y1: int, y2: int, x: int) -> None:
         for y in range(min(y1, y2), max(y1, y2) + 1):
             self.tiles[x][y] = Tile(blocked=False)
 
-    def place_entities(self, room, entities):
+    def place_entities(self, room: Rect, entities: List[Entity]) -> None:
         max_monsters_per_room = from_dungeon_level(self.dungeon_level, [
             # value, first level for this value
-            [2, 1],
-            [3, 4],
-            [5, 6],
+            (2, 1),
+            (3, 4),
+            (5, 6),
         ])
         max_items_per_room = from_dungeon_level(self.dungeon_level, [
-            [1, 1],
-            [2, 4],
+            (1, 1),
+            (2, 4),
         ])
         number_of_monsters = random.randint(0, max_monsters_per_room)
         number_of_items = random.randint(0, max_items_per_room)
@@ -125,27 +130,27 @@ class GameMap:
         monster_chances = {
             'orc': 80,
             'troll': from_dungeon_level(self.dungeon_level, [
-                [15, 3],
-                [30, 5],
-                [60, 7],
+                (15, 3),
+                (30, 5),
+                (60, 7),
             ]),
         }
         item_chances = {
             'healing_potion': 35,
             'sword': from_dungeon_level(self.dungeon_level, [
-                [5, 4],
+                (5, 4),
             ]),
             'shield': from_dungeon_level(self.dungeon_level, [
-                [15, 8],
+                (15, 8),
             ]),
             'lightning_scroll': from_dungeon_level(self.dungeon_level, [
-                [25, 4],
+                (25, 4),
             ]),
             'fireball_scroll': from_dungeon_level(self.dungeon_level, [
-                [25, 6],
+                (25, 6),
             ]),
             'confusion_scroll': from_dungeon_level(self.dungeon_level, [
-                [10, 2],
+                (10, 2),
             ]),
         }
 
@@ -193,7 +198,7 @@ class GameMap:
                                       EquipmentSlots.MAIN_HAND,
                                       power_bonus=3))
                 elif item_choice == 'shield':
-                    item = Entity(x, y, '[', tcod.sky, 'Sword',
+                    item = Entity(x, y, '[', tcod.sky, 'Shield',
                                   render_order=RenderOrder.ITEM,
                                   equippable=Equippable(
                                       EquipmentSlots.OFF_HAND,
@@ -229,13 +234,15 @@ class GameMap:
                     assert False, f'unhandled item_choice: {item_choice}'
                 entities.append(item)
 
-    def is_blocked(self, x, y):
+    def is_blocked(self, x: int, y: int) -> bool:
         if 0 <= x < self.width and 0 <= y < self.height:
             return self.tiles[x][y].blocked
         else:
             return True
 
-    def next_floor(self, player, message_log, constants):
+    def next_floor(self, player: Entity,
+                   message_log: MessageLog,
+                   constants: Type['constants']) -> List[Entity]:
         self.dungeon_level += 1
         entities = [player]
 

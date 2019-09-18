@@ -1,16 +1,21 @@
+from typing import Any, Dict, List
+
 import tcod
 
+from components import Component
+from entity import Entity
 from game_messages import Message
+from game_types import ActionResults
 
 
-class Inventory:
+class Inventory(Component):
 
-    def __init__(self, capacity):
+    def __init__(self, capacity: int):
         self.capacity = capacity
-        self.items = []
+        self.items: List[Entity] = []
 
-    def add_item(self, item):
-        results = []
+    def add_item(self, item: Entity) -> ActionResults:
+        results: ActionResults = []
 
         if len(self.items) >= self.capacity:
             results.append({
@@ -30,8 +35,8 @@ class Inventory:
 
         return results
 
-    def use(self, item_entity, **kwargs):
-        results = []
+    def use(self, item_entity: Entity, **kwargs: Any) -> ActionResults:
+        results: ActionResults = []
 
         item_component = item_entity.item
         if item_component.use_function is None:
@@ -61,10 +66,10 @@ class Inventory:
 
         return results
 
-    def remove_item(self, item):
+    def remove_item(self, item: Entity) -> None:
         self.items.remove(item)
 
-    def drop_item(self, item):
+    def drop_item(self, item: Entity) -> ActionResults:
         results = []
 
         if self.owner.equipment.is_equipped(item):

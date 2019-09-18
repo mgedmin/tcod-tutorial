@@ -1,24 +1,25 @@
 import textwrap
+from typing import List
 
 import tcod
 
 
 class Message:
 
-    def __init__(self, text, color=tcod.white):
+    def __init__(self, text: str, color: tcod.Color = tcod.white) -> None:
         self.text = text
         self.color = color
 
 
 class MessageLog:
 
-    def __init__(self, x, width, height):
-        self.messages = []
+    def __init__(self, x: int, width: int, height: int) -> None:
+        self.messages: List[Message] = []
         self.x = x
         self.width = width
         self.height = height
 
-    def add_message(self, message):
+    def add_message(self, message: Message) -> None:
         # Split the message if necessary, among multiple lines
         new_msg_lines = textwrap.wrap(message.text, self.width)
 

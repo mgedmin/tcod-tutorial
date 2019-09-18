@@ -1,11 +1,15 @@
 #!/usr/bin/python3
+from typing import Dict, List, Optional
+
 import tcod
+from tcod.console import Console
 
 from data_loaders import load_game, save_game
 from death_functions import kill_monster, kill_player
-from entity import get_blocking_entities_at_location
+from entity import Entity, get_blocking_entities_at_location
 from fov_functions import initialize_fov, recompute_fov
-from game_messages import Message
+from game_map import GameMap
+from game_messages import Message, MessageLog
 from game_states import GameStates
 from initialize_new_game import constants, get_game_variables
 from input_handlers import handle_keys, handle_main_menu, handle_mouse
@@ -13,12 +17,12 @@ from menus import main_menu, message_box
 from render_functions import clear_all, render_all
 
 
-def main():
+def main() -> None:
     tcod.console_set_custom_font(
         'arial10x10.png',
         tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_TCOD,
     )
-    tcod.console_init_root(
+    root_console = tcod.console_init_root(
         constants.screen_width, constants.screen_height,
         constants.window_title,
         fullscreen=False,
@@ -30,7 +34,7 @@ def main():
     panel = tcod.console_new(constants.screen_width, constants.panel_height)
 
     player = None
-    entities = []
+    entities: List[Entity] = []
     game_map = None
     message_log = None
     game_state = None
@@ -48,11 +52,11 @@ def main():
                                  key, mouse)
 
         if show_main_menu:
-            main_menu(con, main_menu_background_image,
+            main_menu(root_console, main_menu_background_image,
                       constants.screen_width, constants.screen_height)
 
             if show_load_error_message:
-                message_box(con, 'No save game to load', 50,
+                message_box(root_console, 'No save game to load', 50,
                             constants.screen_width, constants.screen_height)
 
             tcod.console_flush()
@@ -87,12 +91,18 @@ def main():
 
         else:
             tcod.console_clear(con)
+            assert player is not None
+            assert game_map is not None
+            assert message_log is not None
+            assert game_state is not None
             play_game(player, entities, game_map, message_log, game_state,
-                      con, panel)
+                      root_console, con, panel)
             show_main_menu = True
 
 
-def play_game(player, entities, game_map, message_log, game_state, con, panel):
+def play_game(player: Entity, entities: List[Entity], game_map: GameMap,
+              message_log: MessageLog, game_state: GameStates,
+              root_console: Console, con: Console, panel: Console) -> None:
     fov_recompute = True
 
     fov_map = initialize_fov(game_map)
@@ -113,10 +123,12 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel):
                           constants.fov_light_walls, constants.fov_algorithm)
 
         render_all(
+            root_console,
             con, panel, entities, player, game_map, fov_map, fov_recompute,
             message_log, constants.screen_width, constants.screen_height,
             constants.bar_width, constants.panel_height, constants.panel_y,
-            mouse, constants.colors, game_state)
+            mouse, constants.colors, game_state,
+        )
 
         fov_recompute = False
 
@@ -142,7 +154,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel):
         left_click = mouse_action.get('left_click', action.get('left_click'))
         right_click = mouse_action.get('right_click')
 
-        player_turn_results = []
+        player_turn_results: List[Dict] = []
 
         if move and game_state == GameStates.PLAYERS_TURN:
             dx, dy = move
@@ -253,7 +265,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel):
         for player_turn_result in player_turn_results:
             message = player_turn_result.get('message')
             dead_entity = player_turn_result.get('dead')
-            item_added = player_turn_result.get('item_added')
+            item_added: Optional[Entity] = player_turn_result.get('item_added')
             item_consumed = player_turn_result.get('consumed')
             item_dropped = player_turn_result.get('item_dropped')
             equip = player_turn_result.get('equip')

@@ -5,6 +5,10 @@ all: env
 run: env
 	env/bin/engine
 
+.PHONY: mypy
+mypy: env
+	env/bin/mypy --disallow-untyped-defs engine.py
+
 .PHONY: tags
 tags:
 	ctags -R .

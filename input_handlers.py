@@ -1,8 +1,13 @@
+from typing import Any, Dict
+
 import tcod
+
 from game_states import GameStates
+from game_types import UserAction
 
 
-def handle_keys(key, game_state, mouse):
+def handle_keys(key: tcod.Key, game_state: GameStates,
+                mouse: tcod.Mouse) -> UserAction:
     if key.vk == tcod.KEY_ENTER and key.lalt:
         # Alt+Enter: toggle full screen
         return {'fullscreen': True}
@@ -23,7 +28,7 @@ def handle_keys(key, game_state, mouse):
     return {}
 
 
-def handle_player_turn_keys(key):
+def handle_player_turn_keys(key: tcod.Key) -> UserAction:
     # Movement keys
     key_char = chr(key.c)
 
@@ -70,7 +75,7 @@ def handle_player_turn_keys(key):
     return {}
 
 
-def handle_targeting_keys(key, mouse):
+def handle_targeting_keys(key: tcod.Key, mouse: tcod.Mouse) -> UserAction:
     if key.vk == tcod.KEY_ESCAPE:
         return {'exit': True}
 
@@ -80,7 +85,7 @@ def handle_targeting_keys(key, mouse):
     return {}
 
 
-def handle_player_dead_keys(key):
+def handle_player_dead_keys(key: tcod.Key) -> UserAction:
     key_char = chr(key.c)
 
     if key_char == 'i':
@@ -96,7 +101,7 @@ def handle_player_dead_keys(key):
     return {}
 
 
-def handle_inventory_keys(key):
+def handle_inventory_keys(key: tcod.Key) -> UserAction:
     if ord('a') <= key.c <= ord('z'):
         return {'inventory_index': key.c - ord('a')}
 
@@ -107,7 +112,7 @@ def handle_inventory_keys(key):
     return {}
 
 
-def handle_level_up_menu(key):
+def handle_level_up_menu(key: tcod.Key) -> UserAction:
     key_char = chr(key.c)
 
     if key_char == 'a':
@@ -120,7 +125,7 @@ def handle_level_up_menu(key):
     return {}
 
 
-def handle_character_screen(key):
+def handle_character_screen(key: tcod.Key) -> UserAction:
     key_char = chr(key.c)
 
     if key_char == 'c' or key.vk == tcod.KEY_ESCAPE:
@@ -129,7 +134,7 @@ def handle_character_screen(key):
     return {}
 
 
-def handle_main_menu(key):
+def handle_main_menu(key: tcod.Key) -> UserAction:
     key_char = chr(key.c)
     if key_char == 'a':
         return {'new_game': True}
@@ -145,7 +150,7 @@ def handle_main_menu(key):
     return {}
 
 
-def handle_mouse(mouse):
+def handle_mouse(mouse: tcod.Mouse) -> UserAction:
     x, y = mouse.cx, mouse.cy
 
     if mouse.lbutton_pressed:

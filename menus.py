@@ -1,21 +1,30 @@
+from typing import TYPE_CHECKING, List
+
 import tcod
+import tcod.console
+
+from game_types import cast_to_color
+
+if TYPE_CHECKING:
+    from entity import Entity
 
 
-def menu(con, header, options, width, screen_width, screen_height):
+def menu(root_console: tcod.console.Console, header: str, options: List[str],
+         width: int, screen_width: int, screen_height: int) -> None:
     if len(options) > 26:
         raise ValueError('Cannot have a menu with more than 26 options.')
 
     # calculate total height for the header (after auto-wrap) and one line per
     # option
     header_height = tcod.console_get_height_rect(
-        con, 0, 0, width, screen_height, header)
+        root_console, 0, 0, width, screen_height, header)
     height = len(options) + header_height
 
     # create an off-screen console that represents the menu's window
     window = tcod.console_new(width, height)
 
     # print the header, with auto-wrap
-    tcod.console_set_default_foreground(window, tcod.white)
+    tcod.console_set_default_foreground(window, cast_to_color(tcod.white))
     tcod.console_print_rect_ex(
         window, 0, 0, width, height, tcod.BKGND_NONE, tcod.LEFT, header)
 
@@ -31,11 +40,14 @@ def menu(con, header, options, width, screen_width, screen_height):
     # blit the contents of "window" to the root console
     x = (screen_width - width) // 2
     y = (screen_height - height) // 2
-    tcod.console_blit(window, 0, 0, width, height, 0, x, y, 1.0, 0.7)
+    tcod.console_blit(window, 0, 0, width, height,
+                      root_console, x, y, 1.0, 0.7)
 
 
-def inventory_menu(con, header, player, inventory_width,
-                   screen_width, screen_height):
+def inventory_menu(
+    root_console: tcod.console.Console, header: str, player: 'Entity',
+    inventory_width: int, screen_width: int, screen_height: int,
+) -> None:
     # show a menu with each item of the inventory as an option
     if not player.inventory.items:
         # XXX: I don't like this getting an option letter like '(a)'
@@ -49,23 +61,30 @@ def inventory_menu(con, header, player, inventory_width,
             else:
                 options.append(item.name)
 
-    menu(con, header, options, inventory_width, screen_width, screen_height)
+    menu(root_console, header, options, inventory_width,
+         screen_width, screen_height)
 
 
-def level_up_menu(con, header, player, menu_width,
-                  screen_width, screen_height):
+def level_up_menu(
+    root_console: tcod.console.Console, header: str, player: 'Entity',
+    menu_width: int, screen_width: int, screen_height: int,
+) -> None:
     options = [
         f'Constitution (+20 HP, from {player.fighter.max_hp})',
         f'Strength (+1 attack, from {player.fighter.power})',
         f'Agility (+1 defense, from {player.fighter.defense})',
     ]
-    menu(con, header, options, menu_width, screen_width, screen_height)
+    menu(root_console, header, options, menu_width,
+         screen_width, screen_height)
 
 
-def character_screen(player, character_screen_width, character_screen_height,
-                     screen_width, screen_height):
+def character_screen(
+    root_console: tcod.console.Console, player: 'Entity',
+    character_screen_width: int, character_screen_height: int,
+    screen_width: int, screen_height: int,
+) -> None:
     window = tcod.console_new(character_screen_width, character_screen_height)
-    tcod.console_set_default_foreground(window, tcod.white)
+    tcod.console_set_default_foreground(window, cast_to_color(tcod.white))
 
     tcod.console_print_rect_ex(
         window, 0, 1, character_screen_width, character_screen_height,
@@ -93,23 +112,30 @@ def character_screen(player, character_screen_width, character_screen_height,
     x = (screen_width - character_screen_width) // 2
     y = (screen_height - character_screen_height) // 2
     tcod.console_blit(
-        window, 0, 0, character_screen_width, character_screen_height, 0, x, y,
-        1.0, 0.7)
+        window, 0, 0, character_screen_width, character_screen_height,
+        root_console, x, y, 1.0, 0.7,
+    )
 
 
-def main_menu(con, background_image, screen_width, screen_height):
-    tcod.image_blit_2x(background_image, 0, 0, 0)
+def main_menu(root_console: tcod.console.Console,
+              background_image: tcod.image.Image,
+              screen_width: int, screen_height: int) -> None:
+    tcod.image_blit_2x(background_image, root_console, 0, 0)
 
-    tcod.console_set_default_foreground(0, tcod.light_yellow)
-    tcod.console_print_ex(0, screen_width // 2, screen_height // 2 - 4,
+    tcod.console_set_default_foreground(root_console,
+                                        cast_to_color(tcod.light_yellow))
+    tcod.console_print_ex(root_console,
+                          screen_width // 2, screen_height // 2 - 4,
                           tcod.BKGND_NONE, tcod.CENTER,
                           "TOMBS OF THE ANCIENT KINGS")
-    tcod.console_print_ex(0, screen_width // 2, screen_height - 2,
+    tcod.console_print_ex(root_console,
+                          screen_width // 2, screen_height - 2,
                           tcod.BKGND_NONE, tcod.CENTER,
                           "By Marius Gedminas (but not really)")
-    menu(con, '', ['Play a new game', 'Continue last game', 'Quit'], 24,
-         screen_width, screen_height)
+    menu(root_console, '', ['Play a new game', 'Continue last game', 'Quit'],
+         24, screen_width, screen_height)
 
 
-def message_box(con, header, width, screen_width, screen_height):
-    menu(con, header, [], width, screen_width, screen_height)
+def message_box(root_console: tcod.console.Console, header: str, width: int,
+                screen_width: int, screen_height: int) -> None:
+    menu(root_console, header, [], width, screen_width, screen_height)
