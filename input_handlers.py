@@ -1,6 +1,5 @@
-from typing import Any, Dict
-
 import tcod
+import tcod.event
 
 from game_states import GameStates
 from game_types import UserAction
@@ -134,16 +133,15 @@ def handle_character_screen(key: tcod.Key) -> UserAction:
     return {}
 
 
-def handle_main_menu(key: tcod.Key) -> UserAction:
-    key_char = chr(key.c)
-    if key_char == 'a':
+def handle_main_menu(event: tcod.event.KeyboardEvent) -> UserAction:
+    if event.sym == tcod.event.K_a:
         return {'new_game': True}
-    if key_char == 'b':
+    if event.sym == tcod.event.K_b:
         return {'load_game': True}
-    if key_char == 'c' or key.vk == tcod.KEY_ESCAPE:
+    if event.sym in (tcod.event.K_c, tcod.event.K_ESCAPE):
         return {'exit': True}
 
-    if key.vk == tcod.KEY_ENTER and key.lalt:
+    if event.sym == tcod.event.K_RETURN and event.mod & tcod.event.KMOD_ALT:
         # Alt+Enter: toggle full screen
         return {'fullscreen': True}
 

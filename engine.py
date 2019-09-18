@@ -2,7 +2,7 @@
 from typing import Dict, List, Optional
 
 import tcod
-from tcod.console import Console
+import tcod.console
 
 from data_loaders import load_game, save_game
 from death_functions import kill_monster, kill_player
@@ -22,16 +22,23 @@ def main() -> None:
         'arial10x10.png',
         tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_TCOD,
     )
-    root_console = tcod.console_init_root(
+    with tcod.console_init_root(
         constants.screen_width, constants.screen_height,
         constants.window_title,
         fullscreen=False,
+        vsync=True,
         renderer=tcod.RENDERER_SDL2,
-    )
-    tcod.sys_set_fps(60)
+    ) as root_console:
+        tcod.sys_set_fps(60)
 
-    con = tcod.console_new(constants.screen_width, constants.screen_height)
-    panel = tcod.console_new(constants.screen_width, constants.panel_height)
+        main_menu_loop(root_console)
+
+
+def main_menu_loop(root_console: tcod.console.Console) -> None:
+    con = tcod.console.Console(
+        constants.screen_width, constants.screen_height, order='F')
+    panel = tcod.console.Console(
+        constants.screen_width, constants.panel_height, order='F')
 
     player = None
     entities: List[Entity] = []
@@ -44,12 +51,15 @@ def main() -> None:
 
     main_menu_background_image = tcod.image_load('menu_background1.png')
 
-    key = tcod.Key()
-    mouse = tcod.Mouse()
-
-    while not tcod.console_is_window_closed():
-        tcod.sys_check_for_event(tcod.EVENT_KEY_PRESS | tcod.EVENT_MOUSE,
-                                 key, mouse)
+    while True:
+        action = {}
+        for event in tcod.event.wait(1):
+            if event.type == 'QUIT':
+                action = {'exit': True}
+                break
+            elif event.type == 'KEYDOWN':
+                action = handle_main_menu(event)
+                break
 
         if show_main_menu:
             main_menu(root_console, main_menu_background_image,
@@ -60,8 +70,6 @@ def main() -> None:
                             constants.screen_width, constants.screen_height)
 
             tcod.console_flush()
-
-            action = handle_main_menu(key)
 
             new_game = action.get('new_game')
             load_saved_game = action.get('load_game')
@@ -90,7 +98,7 @@ def main() -> None:
                 break
 
         else:
-            tcod.console_clear(con)
+            con.clear()
             assert player is not None
             assert game_map is not None
             assert message_log is not None
@@ -102,7 +110,8 @@ def main() -> None:
 
 def play_game(player: Entity, entities: List[Entity], game_map: GameMap,
               message_log: MessageLog, game_state: GameStates,
-              root_console: Console, con: Console, panel: Console) -> None:
+              root_console: tcod.console.Console, con: tcod.console.Console,
+              panel: tcod.console.Console) -> None:
     fov_recompute = True
 
     fov_map = initialize_fov(game_map)
@@ -214,7 +223,7 @@ def play_game(player: Entity, entities: List[Entity], game_map: GameMap,
                                                    constants)
                     fov_map = initialize_fov(game_map)
                     fov_recompute = True
-                    tcod.console_clear(con)
+                    con.clear()
                     break
             else:
                 message_log.add_message(
