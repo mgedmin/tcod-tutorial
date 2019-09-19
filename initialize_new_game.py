@@ -45,6 +45,7 @@ class constants:
         'dark_ground': tcod.Color(50, 50, 150),
         'light_wall': tcod.Color(130, 110, 50),
         'light_ground': tcod.Color(200, 180, 50),
+        'target_ground': tcod.Color(200, 40, 20),
     }
 
 

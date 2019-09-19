@@ -123,9 +123,10 @@ def play_game(player: Entity, entities: List[Entity], game_map: GameMap,
     mouse = tcod.event.Point(-1, -1)
 
     if player.fighter.hp > 0:
-        previous_game_state = GameStates.PLAYERS_TURN
+        game_state = GameStates.PLAYERS_TURN
     else:
-        previous_game_state = GameStates.PLAYER_DEAD
+        game_state = GameStates.PLAYER_DEAD
+    previous_game_state = game_state
 
     targeting_item = None
 
@@ -151,12 +152,17 @@ def play_game(player: Entity, entities: List[Entity], game_map: GameMap,
             recompute_fov(fov_map, player.x, player.y, constants.fov_radius,
                           constants.fov_light_walls, constants.fov_algorithm)
 
+        target_radius = 0
+        if targeting_item and targeting_item.item:
+            target_radius = targeting_item.item.function_kwargs.get('radius',
+                                                                    0)
+
         render_all(
             root_console,
             con, panel, entities, player, game_map, fov_map, fov_recompute,
             message_log, constants.screen_width, constants.screen_height,
             constants.bar_width, constants.panel_height, constants.panel_y,
-            mouse, constants.colors, game_state,
+            mouse, constants.colors, game_state, target_radius,
         )
 
         fov_recompute = False

@@ -1,4 +1,5 @@
 import enum
+import math
 from operator import attrgetter
 from typing import TYPE_CHECKING, Dict, List
 
@@ -59,27 +60,32 @@ def render_all(
     message_log: MessageLog, screen_width: int, screen_height: int,
     bar_width: int, panel_height: int, panel_y: int, mouse: tcod.event.Point,
     colors: Dict[str, tcod.Color], game_state: GameStates,
+    target_radius: int = 0,
 ) -> None:
     # Draw all the tiles in the game map
-    if fov_recompute:
-        for y in range(game_map.height):
-            for x in range(game_map.width):
-                visible = fov_map.fov[x, y]
-                wall = game_map.tiles[x][y].block_sight
-                if visible:
-                    if wall:
-                        color = colors['light_wall']
+    for y in range(game_map.height):
+        for x in range(game_map.width):
+            visible = fov_map.fov[x, y]
+            wall = game_map.tiles[x][y].block_sight
+            if visible:
+                if wall:
+                    color = colors['light_wall']
+                else:
+                    if (game_state == GameStates.TARGETING and
+                            math.hypot(x - mouse.x,
+                                       y - mouse.y) <= target_radius):
+                        color = colors['target_ground']
                     else:
                         color = colors['light_ground']
-                    game_map.tiles[x][y].explored = True
-                elif game_map.tiles[x][y].explored:
-                    if wall:
-                        color = colors['dark_wall']
-                    else:
-                        color = colors['dark_ground']
+                game_map.tiles[x][y].explored = True
+            elif game_map.tiles[x][y].explored:
+                if wall:
+                    color = colors['dark_wall']
                 else:
-                    continue
-                con.bg[x, y] = cast_to_color(color)
+                    color = colors['dark_ground']
+            else:
+                continue
+            con.bg[x, y] = cast_to_color(color)
 
     # Draw all entities in the list
     for entity in sorted(entities, key=attrgetter('render_order.value')):
