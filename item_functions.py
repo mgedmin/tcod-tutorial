@@ -38,7 +38,7 @@ def cast_lightning(
 
     for entity in entities:
         if (entity.fighter and entity != caster
-                and tcod.map_is_in_fov(fov_map, entity.x, entity.y)):
+                and fov_map.fov[entity.x, entity.y]):
             distance = caster.distance_to(entity)
             if distance < closest_distance:
                 target = entity
@@ -73,7 +73,7 @@ def cast_fireball(
 ) -> ActionResults:
     results = []
 
-    if not tcod.map_is_in_fov(fov_map, target_x, target_y):
+    if not fov_map.fov[target_x, target_y]:
         results.append({
             'consumed': False,
             'message': Message(
@@ -111,7 +111,7 @@ def cast_confuse(
 ) -> ActionResults:
     results = []
 
-    if not tcod.map_is_in_fov(fov_map, target_x, target_y):
+    if not fov_map.fov[target_x, target_y]:
         results.append({
             'consumed': False,
             'message': Message(

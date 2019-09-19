@@ -129,7 +129,7 @@ def play_game(player: Entity, entities: List[Entity], game_map: GameMap,
 
     targeting_item = None
 
-    while not tcod.console_is_window_closed():
+    while True:
         action: UserAction = {}
         for event in tcod.event.wait(1):
             if event.type == 'QUIT':

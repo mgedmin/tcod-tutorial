@@ -133,9 +133,6 @@ class Entity:
             # opening)
             self.move_towards(target.x, target.y, game_map, entities)
 
-        # Delete the path to free memory
-        tcod.path_delete(my_path)
-
     def distance(self, x: int, y: int) -> float:
         return math.hypot(self.x - x, self.y - y)
 
