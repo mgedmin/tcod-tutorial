@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import sys
 from typing import Dict, List, Optional
 
 import tcod
@@ -11,6 +12,7 @@ from fov_functions import initialize_fov, recompute_fov
 from game_map import GameMap
 from game_messages import Message, MessageLog
 from game_states import GameStates
+from game_types import UserAction
 from initialize_new_game import constants, get_game_variables
 from input_handlers import handle_keys, handle_main_menu, handle_mouse
 from menus import main_menu, message_box
@@ -52,13 +54,15 @@ def main_menu_loop(root_console: tcod.console.Console) -> None:
     main_menu_background_image = tcod.image_load('menu_background1.png')
 
     while True:
-        action = {}
+        action: UserAction = {}
+        # We pass a 1 second timeout to wait() primarily to give a chance for
+        # the Python interpreter to react to ^C in a relatively timely manner.
         for event in tcod.event.wait(1):
             if event.type == 'QUIT':
-                action = {'exit': True}
-                break
+                sys.exit()
             elif event.type == 'KEYDOWN':
                 action = handle_main_menu(event)
+            if action:
                 break
 
         if show_main_menu:
@@ -116,16 +120,32 @@ def play_game(player: Entity, entities: List[Entity], game_map: GameMap,
 
     fov_map = initialize_fov(game_map)
 
-    key = tcod.Key()
-    mouse = tcod.Mouse()
+    mouse = tcod.event.Point(-1, -1)
 
-    previous_game_state = game_state
+    if player.fighter.hp > 0:
+        previous_game_state = GameStates.PLAYERS_TURN
+    else:
+        previous_game_state = GameStates.PLAYER_DEAD
 
     targeting_item = None
 
     while not tcod.console_is_window_closed():
-        tcod.sys_check_for_event(tcod.EVENT_KEY_PRESS | tcod.EVENT_MOUSE,
-                                 key, mouse)
+        action: UserAction = {}
+        for event in tcod.event.wait(1):
+            if event.type == 'QUIT':
+                # XXX: what happens if I do this when in the character screen?
+                # or inventory? or while targeting?  will the game load fine?
+                save_game(player, entities, game_map, message_log, game_state)
+                sys.exit()
+            elif event.type == 'KEYDOWN':
+                action = handle_keys(event, game_state, mouse)
+            elif event.type == 'MOUSEMOTION':
+                mouse = event.tile
+            elif event.type == 'MOUSEBUTTONDOWN':
+                mouse = event.tile
+                action = handle_mouse(event)
+            if action:
+                break
 
         if fov_recompute:
             recompute_fov(fov_map, player.x, player.y, constants.fov_radius,
@@ -145,9 +165,6 @@ def play_game(player: Entity, entities: List[Entity], game_map: GameMap,
 
         clear_all(con, entities)
 
-        action = handle_keys(key, game_state, mouse)
-        mouse_action = handle_mouse(mouse)
-
         move = action.get('move')
         wait = action.get('wait')
         pickup = action.get('pickup')
@@ -160,8 +177,8 @@ def play_game(player: Entity, entities: List[Entity], game_map: GameMap,
         exit = action.get('exit')
         fullscreen = action.get('fullscreen')
 
-        left_click = mouse_action.get('left_click', action.get('left_click'))
-        right_click = mouse_action.get('right_click')
+        left_click = action.get('left_click')
+        right_click = action.get('right_click')
 
         player_turn_results: List[Dict] = []
 

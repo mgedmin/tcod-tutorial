@@ -3,6 +3,7 @@ from operator import attrgetter
 from typing import TYPE_CHECKING, Dict, List
 
 import tcod
+import tcod.event
 
 from game_messages import MessageLog
 from game_states import GameStates
@@ -21,9 +22,9 @@ class RenderOrder(enum.Enum):
     ACTOR = enum.auto()
 
 
-def get_names_under_mouse(mouse: tcod.Mouse, entities: List['Entity'],
+def get_names_under_mouse(mouse: tcod.event.Point, entities: List['Entity'],
                           fov_map: tcod.map.Map) -> str:
-    (x, y) = (mouse.cx, mouse.cy)
+    (x, y) = (mouse.x, mouse.y)
 
     names = [
         entity.name
@@ -56,7 +57,7 @@ def render_all(
     panel: tcod.console.Console, entities: List['Entity'], player: 'Entity',
     game_map: 'GameMap', fov_map: tcod.map.Map, fov_recompute: bool,
     message_log: MessageLog, screen_width: int, screen_height: int,
-    bar_width: int, panel_height: int, panel_y: int, mouse: tcod.Mouse,
+    bar_width: int, panel_height: int, panel_y: int, mouse: tcod.event.Point,
     colors: Dict[str, tcod.Color], game_state: GameStates,
 ) -> None:
     # Draw all the tiles in the game map
