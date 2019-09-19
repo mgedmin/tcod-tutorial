@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from entity import Entity
@@ -17,7 +17,7 @@ def component(name: str) -> property:
 
     def getter(self: 'Entity') -> Component:
         try:
-            return self.__dict__[name]
+            return cast(Component, self.__dict__[name])
         except KeyError:
             raise AttributeError(name)
 

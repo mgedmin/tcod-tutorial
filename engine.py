@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import sys
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 import tcod
 import tcod.console
@@ -12,7 +12,7 @@ from fov_functions import initialize_fov, recompute_fov
 from game_map import GameMap
 from game_messages import Message, MessageLog
 from game_states import GameStates
-from game_types import UserAction
+from game_types import ActionResults, UserAction
 from initialize_new_game import constants, get_game_variables
 from input_handlers import handle_keys, handle_main_menu, handle_mouse
 from menus import main_menu, message_box
@@ -186,7 +186,7 @@ def play_game(player: Entity, entities: List[Entity], game_map: GameMap,
         left_click = action.get('left_click')
         right_click = action.get('right_click')
 
-        player_turn_results: List[Dict] = []
+        player_turn_results: ActionResults = []
 
         if move and game_state == GameStates.PLAYERS_TURN:
             dx, dy = move
